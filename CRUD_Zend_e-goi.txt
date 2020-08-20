@@ -1,0 +1,90 @@
+{
+    "name": "zendframework/skeleton-application",
+    "description": "Skeleton Application for ZF2",
+    "license": "BSD-3-Clause",
+    "keywords": [
+        "framework",
+        "zf2"
+    ],
+    "homepage": "http://framework.zend.com/",
+    "require": {
+        "php": ">=5.3.3",
+        "zendframework/zendframework": "2.2.*"
+    }
+}
+
+php composer.phar self-update
+php composer.phar install
+
+http://cepsample.local:8080/api.json/cep/06460000
+
+return array(
+    'router' => array(
+        'routes' => array(
+        ...
+          'cep' => array(
+              'type' => 'Segment',
+              'options' => array(
+                  'route' => '/api/cep[.:format]/[:id]',
+                  'constraints' => array(
+                      'format' => '(json)',
+                  ),
+                  'defaults' => array(
+                      'controller' => 'ApplicationControllerCep',
+                      'format' => 'json',
+                  ),
+              ),
+          ),
+		  
+'controllers' => array(
+    'invokables' => array(
+        'ApplicationControllerIndex' => 'ApplicationControllerIndexController'
+    ),
+),
+'controllers' => array(
+    'invokables' => array(
+        'ApplicationControllerIndex' => 'ApplicationControllerIndexController',
+        'ApplicationControllerCep' => 'ApplicationControllerCepController'
+    ),
+),
+<?php
+
+/**
+ * Zend Framework (http://framework.zend.com/)
+ *
+ * @link      http://github.com/zendframework/ZendSkeletonApplication for the canonical source repository
+ * @copyright Copyright (c) 2005-2014 Zend Technologies USA Inc. (http://www.zend.com)
+ * @license   http://framework.zend.com/license/new-bsd New BSD License
+ */
+
+namespace Application\Controller;
+
+use Zend\Mvc\Controller\AbstractRestfulController;
+
+class CepController extends AbstractRestfulController {
+
+    public function get($id) {
+        $content = array(
+            "CEP" => $id,
+            "Lagradouro" => null,
+            "Bairro" => null,
+            "Cidade" => null,
+            "Estado" => null
+        );
+        /**
+         * You may centralized this process through controller's event callback handler
+         */
+        $format = $this->getEvent()->getRouteMatch()->getParam('format');
+        $response = $this->getResponse();
+        if ($format == 'json') {
+            $contentType = 'application/json';
+            $adapter = '\Zend\Serializer\Adapter\Json';
+        }
+        // continue for xml, amf etc.
+        $response->setStatusCode(200);
+        $response->getHeaders()->addHeaderLine('Content-Type', $contentType);
+        $adapter = new $adapter;
+        $response->setContent($adapter->serialize($content));
+
+        return $response;
+    }
